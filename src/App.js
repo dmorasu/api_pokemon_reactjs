@@ -1,6 +1,6 @@
 import React from 'react';
 import Cuerpo from './Components/cuerpo';
-
+import Lista from './Components/Lista';
 
 
 class App extends React.Component{
@@ -10,6 +10,7 @@ class App extends React.Component{
     return(
       <div>
          <Cuerpo />
+         <Lista />
       </div>
     );
 
