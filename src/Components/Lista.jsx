@@ -1,57 +1,54 @@
-import React, { useEffect } from 'react';
-// import '../App.css'
+import React, { useState, useEffect } from 'react';
+import Card from '../Components/Card';
+import { getPokemon, getAllPokemon } from '../Components/Pokemon';
+import '../App.css';
+
 
 function Lista() {
-const [result, setResult] = React.useState([]);
-const [poke, setPoke] = React.useState([]);
-const [load, setLoad] = React.useState('true');
-const arr = [];
+  const [pokemonData, setPokemonData] = useState([])
+  const [nextUrl, setNextUrl] = useState('');
+  const [prevUrl, setPrevUrl] = useState('');
+  const [loading, setLoading] = useState(true);
+  const initialURL = 'https://pokeapi.co/api/v2/pokemon/?limit=25'
 
-useEffect(() => {
-  fetch('https://pokeapi.co/api/v2/pokemon/?limit=25')
-  .then((response) => response.json())
-  .then((data) => setResult(
-  data.results.map((item) => {
-  fetch(item.url)
-  .then((response) => response.json())
-  .then((allpokemon) => arr.push(allpokemon));
-  setPoke(arr);
-}),
-));
-}, []);
-setTimeout(() => {
-setLoad(false);
-}, 1000);
+  useEffect(() => {
+    async function fetchData() {
+      let response = await getAllPokemon(initialURL)
+      setNextUrl(response.next);
+      setPrevUrl(response.previous);
+      await loadPokemon(response.results);
+      setLoading(false);
+    }
+    fetchData();
+  }, [])
 
-return (
-<div className="App">
-<div className='pokegallery'>
-{ load ? (
-<p>Loading...</p>
-) : (
-poke.map((img, i) => (
+  
+  const loadPokemon = async (data) => {
+    let _pokemonData = await Promise.all(data.map(async pokemon => {
+      let pokemonRecord = await getPokemon(pokemon)
+      return pokemonRecord
+    }))
+    setPokemonData(_pokemonData);
+  }
 
-
-<div id={img.id} key={img.id}>
-<div className='card' style={{ width: '90rem', height: '18rem', backgroundColor: '#F0F0C9' }}>
-
-<div >
-<img  src={img.sprites.front_default} alt='pokemon' />
-<h5 >Nombre: {img.name}</h5>
-<h5>Type: {img.types[0].type.name}</h5>
-<h5>ID: {img.id}</h5>     
-
-</div>
-</div>
-</div>
-))
-)}
-</div>
-</div>
-);
+  return (
+    <>
+   
+      <div>
+        {loading ? <h1 style={{ textAlign: 'center' }}>Loading...</h1> : (
+          <>
+           
+            <div className="grid-container">
+              {pokemonData.map((pokemon, i) => {
+                return <Card key={i} pokemon={pokemon} />
+              })}
+            </div>
+           
+          </>
+        )}
+      </div>
+    </>
+  );
 }
+
 export default Lista;
-
-
-
-
