@@ -1,54 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import Card from '../Components/Card';
-import { getPokemon, getAllPokemon } from '../Components/Pokemon';
-import '../App.css';
+import React, { useState } from 'react'
+import { useEffect } from 'react'
 
+export default function Lista() {
+    const [pokemones, setPokemones] = useState([])
 
-function Lista() {
-  const [pokemonData, setPokemonData] = useState([])
-  const [nextUrl, setNextUrl] = useState('');
-  const [prevUrl, setPrevUrl] = useState('');
-  const [loading, setLoading] = useState(true);
-  const initialURL = 'https://pokeapi.co/api/v2/pokemon/?limit=25'
-
-  useEffect(() => {
-    async function fetchData() {
-      let response = await getAllPokemon(initialURL)
-      setNextUrl(response.next);
-      setPrevUrl(response.previous);
-      await loadPokemon(response.results);
-      setLoading(false);
-    }
-    fetchData();
-  }, [])
-
-  
-  const loadPokemon = async (data) => {
-    let _pokemonData = await Promise.all(data.map(async pokemon => {
-      let pokemonRecord = await getPokemon(pokemon)
-      return pokemonRecord
-    }))
-    setPokemonData(_pokemonData);
-  }
-
-  return (
-    <>
-   
-      <div>
-        {loading ? <h1 style={{ textAlign: 'center' }}>Loading...</h1> : (
-          <>
-           
-            <div className="grid-container">
-              {pokemonData.map((pokemon, i) => {
-                return <Card key={i} pokemon={pokemon} />
-              })}
-            </div>
-           
-          </>
-        )}
-      </div>
-    </>
-  );
+    useEffect(() => {   
+           fetch('https://pokeapi.co/api/v2/pokemon/?limit=25')
+            .then(r => r.json() )
+            .then( pokemon => {  
+                                    
+                setPokemones(pokemon.results)
+            })
+               
+    },[])
+    return (
+        <section>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Imagen</th>
+                        <th>Tipo o Tipos</th>
+                        <th>Id</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {pokemones.map ((poke, index) => {
+                        return <tr key={index}>
+                            <td>{poke.name}</td>
+                            <td><img  src={`https://pokeres.bastionbot.org/images/pokemon/${index +1}.png`} alt="Nombre Pokemon" /></td>
+                                                       
+                        </tr>
+                    })}
+                </tbody>
+            </table>
+        </section>
+    )
 }
-
-export default Lista;
